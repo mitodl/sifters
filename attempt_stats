@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Use edx-platform command added for proctor xmodule to
+# report on attempts made by students
+VENV_PATH="$1"
+EDX_PATH="$2"
+COURSE_ID="$3"
+OUTPUT_CSV="$4"
+
+if [[ "$OUTPUT_CSV" == "" ]]; then
+	OUTPUT_CSV="attempt_stats_$(date +"%Y-%m-%dT%H:%M").csv"
+fi
+
+echo "Setting report file name to $OUTPUT_CSV" >&2
+
+tmpcsv=$(mktemp)
+cd $EDX_PATH
+cmd="$VENV_PATH/bin/python manage.py lms --settings=aws attempt_stats --csv-output-filename $tmpcsv $COURSE_ID > /dev/null"
+eval $cmd
+if [ $? -ne 0 ]; then
+	echo "Ran command: $cmd" >&2
+	echo "attempt_stats command failed" >&2
+	exit -2
+fi
+
+# Run sifter specific output to name file and spit output into stdout
+# stream for storage.
+echo "$OUTPUT_CSV"
+cat $tmpcsv
+rm $tmcsv
