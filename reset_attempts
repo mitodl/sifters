@@ -86,4 +86,4 @@ fi
 # stream for storage.
 echo "$OUTPUT_CSV"
 cat $tmpcsv
-rm $tmcsv
+rm $tmpcsv
